@@ -1,0 +1,8 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Small helpers for touch-friendly UI */
+.button-large {
+  @apply px-4 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700;
+}

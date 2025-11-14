@@ -1,0 +1,19 @@
+version: "3.8"
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "4000:4000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/ipo
+      - JWT_SECRET=devsecret
+    depends_on:
+      - mongo
+  mongo:
+    image: mongo:6.0
+    volumes:
+      - mongo-data:/data/db
+    ports:
+      - "27017:27017"
+volumes:
+  mongo-data:

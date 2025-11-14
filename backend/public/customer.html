@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Customer - IPO Demo</title>
+  </head>
+  <body>
+    <h1>Customer</h1>
+    <label>Table number: <input id="table" value="1" /></label>
+    <br />
+    <label
+      >Items JSON:
+      <input
+        id="items"
+        value='[{"name":"Masala Dosa","price":80,"qty":1}]'
+        size="80"
+    /></label>
+    <br />
+    <button id="place">Place Order</button>
+
+    <h2>Order updates</h2>
+    <pre id="updates"></pre>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const updates = document.getElementById("updates");
+      const tableInput = document.getElementById("table");
+      let tableNs = null;
+
+      function log(msg) {
+        updates.textContent += msg + "\n";
+      }
+
+      document.getElementById("place").onclick = async () => {
+        const tableNumber = parseInt(tableInput.value, 10);
+        const items = JSON.parse(document.getElementById("items").value);
+        const res = await fetch("/orders", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            authorization: "Bearer ",
+          },
+          body: JSON.stringify({
+            tableNumber,
+            items,
+            payment: { method: "cash" },
+          }),
+        });
+        const order = await res.json();
+        log("Placed order: " + JSON.stringify(order));
+
+        // connect to table namespace to receive updates
+        if (tableNs) tableNs.disconnect();
+        tableNs = io(`/table:${tableNumber}`);
+        tableNs.on("connect", () => log("Connected to table namespace"));
+        tableNs.on("order_update", (o) =>
+          log("Order update: " + JSON.stringify(o))
+        );
+      };
+    </script>
+  </body>
+</html>

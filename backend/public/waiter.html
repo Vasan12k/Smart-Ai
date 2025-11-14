@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Waiter - IPO Demo</title>
+  </head>
+  <body>
+    <h1>Waiter</h1>
+    <div id="log"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const log = document.getElementById("log");
+      const socket = io("/waiter");
+      socket.on("connect", () => {
+        log.innerHTML += "<div>Connected as waiter</div>";
+      });
+      socket.on("order_status_changed", (order) => {
+        if (order.status === "ready") {
+          const d = document.createElement("div");
+          d.innerHTML = `<div>Order ready for table ${order.tableNumber} (id: ${order._id}) <button>Mark Served</button></div>`;
+          const btn = d.querySelector("button");
+          btn.onclick = async () => {
+            await fetch("/orders/" + order._id + "/status", {
+              method: "PATCH",
+              headers: {
+                "Content-Type": "application/json",
+                authorization: "Bearer ",
+              },
+              body: JSON.stringify({ status: "served" }),
+            });
+          };
+          log.appendChild(d);
+        }
+      });
+    </script>
+  </body>
+</html>

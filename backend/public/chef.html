@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Chef - IPO Demo</title>
+  </head>
+  <body>
+    <h1>Chef</h1>
+    <div id="orders"></div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+      const ordersDiv = document.getElementById("orders");
+      const socket = io("/chef");
+      socket.on("connect", () => {
+        ordersDiv.innerHTML += "<div>Connected as chef</div>";
+      });
+      socket.on("new_order", (order) => {
+        const d = document.createElement("div");
+        d.innerHTML = `<pre>${JSON.stringify(order, null, 2)}</pre>`;
+        const prep = document.createElement("button");
+        prep.textContent = "Mark Preparing";
+        prep.onclick = async () => {
+          await fetch("/orders/" + order._id + "/status", {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              authorization: "Bearer ",
+            },
+            body: JSON.stringify({ status: "preparing" }),
+          });
+        };
+        const ready = document.createElement("button");
+        ready.textContent = "Mark Ready";
+        ready.onclick = async () => {
+          await fetch("/orders/" + order._id + "/status", {
+            method: "PATCH",
+            headers: {
+              "Content-Type": "application/json",
+              authorization: "Bearer ",
+            },
+            body: JSON.stringify({ status: "ready" }),
+          });
+        };
+        d.appendChild(prep);
+        d.appendChild(ready);
+        ordersDiv.appendChild(d);
+      });
+
+      socket.on("order_status_changed", (order) => {
+        ordersDiv.innerHTML +=
+          "<div>Order status changed: " +
+          order._id +
+          " -> " +
+          order.status +
+          "</div>";
+      });
+    </script>
+  </body>
+</html>
