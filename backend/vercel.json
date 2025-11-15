@@ -8,11 +8,24 @@
   ],
   "routes": [
     {
+      "src": "/auth/(.*)",
+      "dest": "src/index.js"
+    },
+    {
+      "src": "/manager/(.*)",
+      "dest": "src/index.js"
+    },
+    {
+      "src": "/orders/(.*)",
+      "dest": "src/index.js"
+    },
+    {
+      "src": "/ai/(.*)",
+      "dest": "src/index.js"
+    },
+    {
       "src": "/(.*)",
       "dest": "src/index.js"
     }
-  ],
-  "env": {
-    "NODE_ENV": "production"
-  }
+  ]
 }

@@ -14,6 +14,15 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Health check endpoint
+app.get("/", (req, res) => {
+  res.json({ status: "ok", message: "AI Restaurant API is running" });
+});
+
+app.get("/api", (req, res) => {
+  res.json({ status: "ok", message: "AI Restaurant API is running" });
+});
+
 app.use("/auth", authRoutes);
 app.use("/manager", managerRoutes);
 app.use("/orders", ordersRoutes);
@@ -50,6 +59,12 @@ const start = async () => {
   });
 };
 
-start();
+// For Vercel serverless deployment
+if (process.env.VERCEL) {
+  initializeFirebase();
+  module.exports = app;
+} else {
+  start();
+}
 
 module.exports = { app, server, io };
