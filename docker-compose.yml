@@ -5,7 +5,7 @@ services:
     ports:
       - "4000:4000"
     environment:
-      - MONGO_URI=mongodb://mongo:27017/ipo
+      - MONGO_URI=mongodb://mongo:27017/ai-restaurant
       - JWT_SECRET=devsecret
     depends_on:
       - mongo

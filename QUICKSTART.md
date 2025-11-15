@@ -1,4 +1,4 @@
-# IPO Restaurant Management System
+# AI Restaurant Management System
 
 ## ✅ QR Code Flow Complete!
 
@@ -118,4 +118,4 @@ Create accounts for Chef and Waiter roles the same way.
 
 ---
 
-**Enjoy your IPO Restaurant Management System!** 🍽️
+**Enjoy your AI Restaurant Management System!** 🍽️

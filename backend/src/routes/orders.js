@@ -2,33 +2,50 @@ const express = require("express");
 const router = express.Router();
 const { authMiddleware, roleRequired } = require("../middleware/auth");
 const { getIo } = require("../socket");
-const Order = require("../models/Order");
+const { getDb } = require("../config/firebase");
 
 // Create an order (Customer)
 router.post("/", authMiddleware, roleRequired("customer"), async (req, res) => {
   try {
     const { tableNumber, items, payment } = req.body;
-    const order = new Order({
+
+    let db;
+    try {
+      db = getDb();
+    } catch (dbError) {
+      console.error("Firebase error:", dbError.message);
+      return res.status(500).json({ message: "Database connection error" });
+    }
+
+    const ordersRef = db.collection("orders");
+
+    const orderData = {
       tableNumber,
       items,
       customerId: req.user.id,
-      payment,
-    });
-    await order.save();
-    // TODO: emit to /chef namespace
-    // Emit socket events to chef, manager, and table namespace
-    const io = getIo();
-    if (io) {
-      // send new order to chefs
-      io.of("/chef").emit("new_order", order);
-      // notify manager
-      io.of("/manager").emit("order_created", order);
-      // notify the specific table namespace
-      const tableNsName = `/table:${order.tableNumber}`;
-      const ns = io.of(tableNsName);
-      if (ns) ns.emit("order_update", order);
+      payment: payment || { method: "cash", paid: false },
+      status: "received",
+      createdAt: new Date().toISOString(),
+    };
+
+    try {
+      const orderDoc = await ordersRef.add(orderData);
+      const order = { id: orderDoc.id, ...orderData };
+
+      // Emit socket events to chef, manager, and table namespace
+      const io = getIo();
+      if (io) {
+        io.of("/chef").emit("new_order", order);
+        io.of("/manager").emit("order_created", order);
+        const tableNsName = `/table:${order.tableNumber}`;
+        const ns = io.of(tableNsName);
+        if (ns) ns.emit("order_update", order);
+      }
+      res.json(order);
+    } catch (dbError) {
+      console.error("Firebase write error:", dbError.message);
+      return res.status(500).json({ message: "Could not create order" });
     }
-    res.json(order);
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -39,8 +56,20 @@ router.post("/", authMiddleware, roleRequired("customer"), async (req, res) => {
 router.post("/public", async (req, res) => {
   try {
     const { tableNumber, items, payment } = req.body;
-    const order = new Order({ tableNumber, items, payment });
-    await order.save();
+    const db = getDb();
+    const ordersRef = db.collection("orders");
+
+    const orderData = {
+      tableNumber,
+      items,
+      payment: payment || { method: "cash", paid: false },
+      status: "received",
+      createdAt: new Date().toISOString(),
+    };
+
+    const orderDoc = await ordersRef.add(orderData);
+    const order = { id: orderDoc.id, ...orderData };
+
     // Emit socket events
     const io = getIo();
     if (io) {
@@ -61,10 +90,20 @@ router.post("/public", async (req, res) => {
 router.get("/", authMiddleware, async (req, res) => {
   try {
     const role = req.user.role;
-    let query = {};
-    if (role === "customer") query = { customerId: req.user.id };
-    // chefs see all; waiters/managers see all
-    const orders = await Order.find(query).populate("items.food");
+    const db = getDb();
+    const ordersRef = db.collection("orders");
+
+    let query = ordersRef;
+    if (role === "customer") {
+      query = query.where("customerId", "==", req.user.id);
+    }
+
+    const snapshot = await query.get();
+    const orders = [];
+    snapshot.forEach((doc) => {
+      orders.push({ id: doc.id, ...doc.data() });
+    });
+
     res.json(orders);
   } catch (err) {
     console.error(err);
@@ -80,11 +119,17 @@ router.patch(
   async (req, res) => {
     try {
       const { status } = req.body;
-      const order = await Order.findById(req.params.id);
-      if (!order) return res.status(404).json({ message: "Not found" });
-      order.status = status;
-      await order.save();
-      // TODO: emit socket updates
+      const db = getDb();
+      const ordersRef = db.collection("orders");
+      const orderDoc = await ordersRef.doc(req.params.id).get();
+
+      if (!orderDoc.exists) {
+        return res.status(404).json({ message: "Not found" });
+      }
+
+      await ordersRef.doc(req.params.id).update({ status });
+      const order = { id: orderDoc.id, ...orderDoc.data(), status };
+
       // emit socket updates
       const io = getIo();
       if (io) {

@@ -1,4 +1,4 @@
-# IPO - Intelligent Process Organizer
+# AI Restaurant - Smart Restaurant Management System
 
 Full-stack AI-powered restaurant management system with real-time ordering, role-based access, and responsive UI.
 

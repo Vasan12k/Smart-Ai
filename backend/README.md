@@ -1,4 +1,4 @@
-# IPO Backend
+# AI Restaurant Backend
 
 Quick start:
 

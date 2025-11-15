@@ -91,93 +91,144 @@ export default function Manager() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-blue-600 text-white p-4 flex justify-between items-center">
-        <h1 className="text-2xl font-bold">Manager Panel</h1>
-        <button onClick={logout} className="bg-red-500 px-4 py-2 rounded">
-          Logout
-        </button>
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      <header className="gradient-ocean text-white p-6 shadow-2xl">
+        <div className="max-w-7xl mx-auto flex justify-between items-center">
+          <div className="flex items-center space-x-4">
+            <div className="p-3 bg-white bg-opacity-20 rounded-xl backdrop-blur-lg">
+              <svg className="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M10 3.5a1.5 1.5 0 013 0V4a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-.5a1.5 1.5 0 000 3h.5a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-.5a1.5 1.5 0 00-3 0v.5a1 1 0 01-1 1H6a1 1 0 01-1-1v-3a1 1 0 00-1-1h-.5a1.5 1.5 0 010-3H4a1 1 0 001-1V6a1 1 0 011-1h3a1 1 0 001-1v-.5z" />
+              </svg>
+            </div>
+            <h1 className="text-3xl font-bold">Manager Dashboard</h1>
+          </div>
+          <button
+            onClick={logout}
+            className="bg-white bg-opacity-20 backdrop-blur-lg hover:bg-opacity-30 px-6 py-3 rounded-xl font-semibold transition-all duration-300 hover-lift"
+          >
+            🚪 Logout
+          </button>
+        </div>
       </header>
 
-      <nav className="bg-white shadow">
-        <div className="flex space-x-4 p-2">
-          {["menu", "orders", "qr", "analytics"].map((tab) => (
+      <nav className="bg-white shadow-lg sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto flex space-x-2 p-4 overflow-x-auto">
+          {[
+            { key: "menu", icon: "🍽️", label: "Menu" },
+            { key: "orders", icon: "📋", label: "Orders" },
+            { key: "qr", icon: "📱", label: "QR Code" },
+            { key: "analytics", icon: "📊", label: "Analytics" },
+          ].map((tab, index) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded ${
-                activeTab === tab ? "bg-blue-500 text-white" : "bg-gray-100"
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-6 py-3 rounded-xl font-semibold transition-all duration-300 whitespace-nowrap animate-fadeIn delay-${
+                index * 100
+              } ${
+                activeTab === tab.key
+                  ? "gradient-primary text-white shadow-lg transform scale-105"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover-lift"
               }`}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
+              <span className="mr-2">{tab.icon}</span>
+              {tab.label}
             </button>
           ))}
         </div>
       </nav>
 
-      <main className="p-4 max-w-6xl mx-auto">
+      <main className="p-6 max-w-7xl mx-auto">
         {activeTab === "menu" && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Menu Management</h2>
+          <div className="animate-fadeIn">
+            <div className="flex items-center mb-6">
+              <h2 className="text-3xl font-bold text-gray-800">
+                Menu Management
+              </h2>
+            </div>
             <form
               onSubmit={addMenuItem}
-              className="bg-white p-4 rounded shadow mb-6 grid grid-cols-1 md:grid-cols-2 gap-4"
+              className="card-elevated p-6 mb-8 grid grid-cols-1 md:grid-cols-2 gap-6 animate-scaleIn"
             >
               <input
-                placeholder="Name"
+                placeholder="Dish Name"
                 value={newItem.name}
                 onChange={(e) =>
                   setNewItem({ ...newItem, name: e.target.value })
                 }
-                className="border px-3 py-2 rounded"
+                className="input-modern"
                 required
               />
               <input
-                placeholder="Price"
+                placeholder="Price (₹)"
                 type="number"
                 value={newItem.price}
                 onChange={(e) =>
                   setNewItem({ ...newItem, price: e.target.value })
                 }
-                className="border px-3 py-2 rounded"
+                className="input-modern"
                 required
               />
-              <input
-                placeholder="Category"
+              <select
                 value={newItem.category}
                 onChange={(e) =>
                   setNewItem({ ...newItem, category: e.target.value })
                 }
-                className="border px-3 py-2 rounded"
-              />
+                className="input-modern"
+                required
+              >
+                <option value="">Select Category</option>
+                <option value="veg">🥗 Veg</option>
+                <option value="non-veg">🍗 Non-Veg</option>
+                <option value="appetizer">🥟 Appetizer</option>
+                <option value="dessert">🍰 Dessert</option>
+                <option value="drinks">🥤 Drinks</option>
+              </select>
               <input
                 placeholder="Image URL"
                 value={newItem.imageUrl}
                 onChange={(e) =>
                   setNewItem({ ...newItem, imageUrl: e.target.value })
                 }
-                className="border px-3 py-2 rounded"
+                className="input-modern"
               />
               <button
                 type="submit"
-                className="md:col-span-2 bg-blue-600 text-white py-2 rounded"
+                className="md:col-span-2 gradient-success text-white py-4 rounded-xl font-bold text-lg hover-lift hover-glow transition-all duration-300 transform hover:scale-105 active:scale-95"
               >
-                Add Item
+                ➕ Add Menu Item
               </button>
             </form>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {menuItems.map((item) => (
-                <div key={item._id} className="bg-white p-4 rounded shadow">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {menuItems.map((item, index) => (
+                <div
+                  key={item._id}
+                  className={`card-elevated p-6 hover-scale animate-fadeIn delay-${
+                    (index % 3) * 100
+                  }`}
+                >
                   {item.imageUrl && (
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      className="w-full h-40 object-cover rounded mb-2"
-                    />
+                    <div className="relative overflow-hidden rounded-xl mb-4">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="w-full h-48 object-cover transition-transform duration-300 hover:scale-110"
+                      />
+                      <div className="absolute top-3 right-3 bg-white bg-opacity-90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-bold text-gray-800">
+                        ₹{item.price}
+                      </div>
+                    </div>
                   )}
-                  <h3 className="font-semibold">{item.name}</h3>
-                  <p className="text-sm text-gray-600">{item.category}</p>
-                  <p className="text-lg font-bold">₹{item.price}</p>
+                  <h3 className="font-bold text-xl text-gray-800 mb-2">
+                    {item.name}
+                  </h3>
+                  <span className="inline-block bg-gradient-to-r from-purple-100 to-blue-100 text-purple-700 px-3 py-1 rounded-full text-sm font-semibold">
+                    {item.category}
+                  </span>
+                  {!item.imageUrl && (
+                    <p className="text-2xl font-bold text-blue-600 mt-3">
+                      ₹{item.price}
+                    </p>
+                  )}
                 </div>
               ))}
             </div>
@@ -185,11 +236,18 @@ export default function Manager() {
         )}
 
         {activeTab === "orders" && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">All Orders</h2>
+          <div className="animate-fadeIn">
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">
+              All Orders
+            </h2>
             <div className="space-y-4">
-              {orders.map((order) => (
-                <div key={order._id} className="bg-white p-4 rounded shadow">
+              {orders.map((order, index) => (
+                <div
+                  key={order._id}
+                  className={`card-elevated p-6 animate-slideInRight delay-${
+                    (index % 5) * 100
+                  }`}
+                >
                   <div className="flex justify-between items-start">
                     <div>
                       <p className="font-semibold">Table {order.tableNumber}</p>

@@ -6,7 +6,7 @@ const resources = {
   en: {
     translation: {
       // Header
-      appName: "IPO Restaurant",
+      appName: "AI Powered Smart Restaurant",
       table: "Table",
       aiAssistant: "AI Assistant",
 
@@ -71,8 +71,8 @@ const resources = {
   ta: {
     translation: {
       // Header
-      appName: "IPO உணவகம்",
-      table: "மேசை",
+      appName: "AI ஸ்மார்ட் உணவகம்",
+      table: "மேஜை",
       aiAssistant: "AI உதவியாளர்",
 
       // Menu
@@ -136,8 +136,8 @@ const resources = {
   hi: {
     translation: {
       // Header
-      appName: "IPO रेस्टोरेंट",
-      table: "टेबल",
+      appName: "AI स्मार्ट रेस्टोरेंट",
+      table: "मेज़",
       aiAssistant: "AI सहायक",
 
       // Menu

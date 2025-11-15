@@ -91,57 +91,105 @@ export default function Customer() {
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-orange-600 text-white p-4 flex justify-between items-center">
-        <div>
-          <h1 className="text-2xl font-bold">Customer</h1>
-          <p className="text-sm">Table {tableNumber}</p>
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-red-100 pb-20">
+      <header className="gradient-sunset text-white p-3 sm:p-6 shadow-2xl">
+        <div className="max-w-7xl mx-auto flex justify-between items-center gap-2">
+          <div className="animate-fadeIn">
+            <h1 className="text-xl sm:text-2xl md:text-4xl font-bold flex items-center gap-1 sm:gap-2">
+              <span className="text-2xl sm:text-3xl md:text-4xl">👤</span>
+              <span className="hidden sm:inline">Customer Portal</span>
+              <span className="sm:hidden">Portal</span>
+            </h1>
+            <p className="text-xs sm:text-sm opacity-90 mt-1 bg-white bg-opacity-20 backdrop-blur-sm px-2 sm:px-4 py-1 rounded-full inline-block">
+              🪑 Table {tableNumber}
+            </p>
+          </div>
+          <button
+            onClick={logout}
+            className="bg-white bg-opacity-20 backdrop-blur-lg hover:bg-opacity-30 px-3 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl text-sm sm:text-base font-bold transition-all duration-300 hover-lift animate-slideInRight"
+          >
+            <span className="sm:hidden">🚺</span>
+            <span className="hidden sm:inline">🚺 Logout</span>
+          </button>
         </div>
-        <button onClick={logout} className="bg-red-500 px-4 py-2 rounded">
-          Logout
-        </button>
       </header>
 
-      <nav className="bg-white shadow">
-        <div className="flex space-x-4 p-2">
-          {["menu", "cart", "orders"].map((tab) => (
+      <nav className="bg-white shadow-lg sticky top-0 z-40">
+        <div className="max-w-7xl mx-auto flex space-x-2 p-2 sm:p-4 overflow-x-auto">
+          {[
+            { key: "menu", icon: "🍽️", label: "Menu" },
+            { key: "cart", icon: "🛒", label: "Cart", badge: cart.length },
+            { key: "orders", icon: "📋", label: "Orders" },
+          ].map((tab, index) => (
             <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-4 py-2 rounded ${
-                activeTab === tab ? "bg-orange-500 text-white" : "bg-gray-100"
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`px-4 sm:px-6 py-2 sm:py-3 rounded-lg sm:rounded-xl text-sm sm:text-base font-bold transition-all duration-300 relative animate-fadeIn delay-${
+                index * 100
+              } whitespace-nowrap ${
+                activeTab === tab.key
+                  ? "gradient-sunset text-white shadow-lg transform scale-105"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200 hover-lift"
               }`}
             >
-              {tab.charAt(0).toUpperCase() + tab.slice(1)}
-              {tab === "cart" && cart.length > 0 && ` (${cart.length})`}
+              <span className="mr-1 sm:mr-2">{tab.icon}</span>
+              {tab.label}
+              {tab.badge > 0 && (
+                <span className="absolute -top-1 -right-1 sm:-top-2 sm:-right-2 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center animate-pulse-custom">
+                  {tab.badge}
+                </span>
+              )}
             </button>
           ))}
         </div>
       </nav>
 
-      <main className="p-4 max-w-4xl mx-auto">
+      <main className="p-3 sm:p-6 max-w-7xl mx-auto">
         {activeTab === "menu" && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Menu</h2>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {menu.map((item) => (
-                <div key={item._id} className="bg-white p-4 rounded shadow">
+          <div className="animate-fadeIn">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-gray-800 flex items-center gap-2">
+              <span className="text-3xl sm:text-4xl">🍽️</span>
+              Our Menu
+            </h2>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              {menu.map((item, index) => (
+                <div
+                  key={item._id}
+                  className={`card-elevated overflow-hidden hover-scale animate-fadeIn delay-${
+                    (index % 3) * 100
+                  }`}
+                >
                   {item.imageUrl && (
-                    <img
-                      src={item.imageUrl}
-                      alt={item.name}
-                      className="w-full h-40 object-cover rounded mb-2"
-                    />
+                    <div className="relative overflow-hidden">
+                      <img
+                        src={item.imageUrl}
+                        alt={item.name}
+                        className="w-full h-48 object-cover transition-transform duration-500 hover:scale-110"
+                      />
+                      <div className="absolute top-3 right-3 bg-gradient-to-r from-orange-600 to-red-600 text-white px-3 py-1 rounded-full font-bold shadow-lg">
+                        ₹{item.price}
+                      </div>
+                    </div>
                   )}
-                  <h3 className="font-semibold">{item.name}</h3>
-                  <p className="text-sm text-gray-600">{item.category}</p>
-                  <p className="text-lg font-bold mb-2">₹{item.price}</p>
-                  <button
-                    onClick={() => addToCart(item)}
-                    className="w-full bg-orange-500 text-white py-2 rounded hover:bg-orange-600"
-                  >
-                    Add to Cart
-                  </button>
+                  <div className="p-5">
+                    <h3 className="font-bold text-xl text-gray-800 mb-2">
+                      {item.name}
+                    </h3>
+                    <span className="inline-block bg-gradient-to-r from-orange-100 to-red-100 text-orange-700 px-3 py-1 rounded-full text-xs font-semibold mb-3">
+                      {item.category}
+                    </span>
+                    {!item.imageUrl && (
+                      <p className="text-2xl font-bold gradient-sunset bg-clip-text text-transparent mb-3">
+                        ₹{item.price}
+                      </p>
+                    )}
+                    <button
+                      onClick={() => addToCart(item)}
+                      className="w-full gradient-success text-white py-3 rounded-xl font-bold hover-lift hover-glow transition-all duration-300 transform hover:scale-105 active:scale-95"
+                    >
+                      ➕ Add to Cart
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
@@ -149,35 +197,56 @@ export default function Customer() {
         )}
 
         {activeTab === "cart" && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Cart</h2>
+          <div className="animate-fadeIn">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-gray-800 flex items-center gap-2">
+              <span className="text-3xl sm:text-4xl">🛒</span>
+              Your Cart
+            </h2>
             {cart.length === 0 ? (
-              <p className="text-gray-500 text-center">Cart is empty</p>
+              <div className="text-center py-12 sm:py-20">
+                <div className="text-6xl sm:text-8xl mb-4">🛍️</div>
+                <p className="text-xl sm:text-2xl font-bold text-gray-400">
+                  Cart is Empty
+                </p>
+                <p className="text-gray-500 mt-2">Add some delicious items!</p>
+                <button
+                  onClick={() => setActiveTab("menu")}
+                  className="mt-6 gradient-sunset text-white px-8 py-4 rounded-xl font-bold hover-lift transition-all duration-300"
+                >
+                  Browse Menu
+                </button>
+              </div>
             ) : (
               <>
-                <div className="space-y-3 mb-4">
-                  {cart.map((item) => (
+                <div className="space-y-4 mb-6">
+                  {cart.map((item, index) => (
                     <div
                       key={item._id}
-                      className="bg-white p-4 rounded shadow flex justify-between items-center"
+                      className={`card-elevated p-4 sm:p-5 flex flex-col sm:flex-row sm:justify-between sm:items-center hover-scale animate-fadeIn delay-${
+                        index * 100
+                      }`}
                     >
-                      <div>
-                        <h3 className="font-semibold">{item.name}</h3>
-                        <p className="text-sm text-gray-600">
+                      <div className="flex-1 mb-3 sm:mb-0">
+                        <h3 className="font-bold text-lg sm:text-xl text-gray-800">
+                          {item.name}
+                        </h3>
+                        <p className="text-xs sm:text-sm text-gray-600 mt-1">
                           ₹{item.price} each
                         </p>
                       </div>
-                      <div className="flex items-center space-x-2">
+                      <div className="flex items-center justify-between sm:justify-start space-x-3 sm:space-x-4">
                         <button
                           onClick={() => updateCartQty(item._id, item.qty - 1)}
-                          className="bg-gray-200 px-3 py-1 rounded"
+                          className="bg-gradient-to-r from-red-500 to-pink-500 text-white w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl font-bold hover-lift transition-all duration-300 flex items-center justify-center"
                         >
-                          -
+                          −
                         </button>
-                        <span className="font-semibold">{item.qty}</span>
+                        <span className="font-bold text-xl sm:text-2xl text-gray-800 min-w-[2.5rem] sm:min-w-[3rem] text-center">
+                          {item.qty}
+                        </span>
                         <button
                           onClick={() => updateCartQty(item._id, item.qty + 1)}
-                          className="bg-gray-200 px-3 py-1 rounded"
+                          className="bg-gradient-to-r from-green-500 to-emerald-500 text-white w-9 h-9 sm:w-10 sm:h-10 rounded-lg sm:rounded-xl font-bold hover-lift transition-all duration-300 flex items-center justify-center"
                         >
                           +
                         </button>
@@ -185,20 +254,29 @@ export default function Customer() {
                     </div>
                   ))}
                 </div>
-                <div className="bg-white p-4 rounded shadow mb-4">
-                  <p className="text-lg font-bold">Total: ₹{cartTotal}</p>
+                <div className="card-elevated p-4 sm:p-6 mb-4 sm:mb-6 bg-gradient-to-r from-orange-50 to-red-50">
+                  <div className="flex flex-col sm:flex-row justify-between items-center gap-2 sm:gap-0">
+                    <span className="text-lg sm:text-2xl font-bold text-gray-800">
+                      Total Amount:
+                    </span>
+                    <span className="text-2xl sm:text-3xl font-bold gradient-sunset bg-clip-text text-transparent">
+                      ₹{cartTotal}
+                    </span>
+                  </div>
                 </div>
-                <div className="flex space-x-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                   <button
                     onClick={() => placeOrder("cash")}
-                    className="flex-1 bg-green-600 text-white py-3 rounded hover:bg-green-700 font-semibold"
+                    className="gradient-forest text-white py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover-lift hover-glow transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
                   >
-                    Pay Cash
+                    <span className="text-xl sm:text-2xl">💵</span>
+                    Pay with Cash
                   </button>
                   <button
                     onClick={() => placeOrder("online")}
-                    className="flex-1 bg-blue-600 text-white py-3 rounded hover:bg-blue-700 font-semibold"
+                    className="gradient-info text-white py-3 sm:py-4 rounded-xl font-bold text-base sm:text-lg hover-lift hover-glow transition-all duration-300 transform hover:scale-105 flex items-center justify-center gap-2"
                   >
+                    <span className="text-xl sm:text-2xl">💳</span>
                     Pay Online
                   </button>
                 </div>
@@ -208,49 +286,86 @@ export default function Customer() {
         )}
 
         {activeTab === "orders" && (
-          <div>
-            <h2 className="text-xl font-semibold mb-4">My Orders</h2>
+          <div className="animate-fadeIn">
+            <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-6 text-gray-800 flex items-center gap-2">
+              <span className="text-3xl sm:text-4xl">📋</span>
+              My Orders
+            </h2>
             <div className="space-y-4">
-              {myOrders.map((order) => (
-                <div key={order._id} className="bg-white p-4 rounded shadow">
-                  <div className="flex justify-between items-start mb-2">
+              {myOrders.map((order, index) => (
+                <div
+                  key={order._id}
+                  className={`card-elevated p-4 sm:p-6 hover-scale animate-fadeIn delay-${
+                    (index % 3) * 100
+                  }`}
+                >
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-3 sm:gap-0 mb-4">
                     <div>
-                      <p className="font-semibold">
+                      <p className="font-bold text-lg sm:text-xl text-gray-800 flex items-center gap-2">
+                        <span>🧾</span>
                         Order #{order._id.slice(-6)}
                       </p>
-                      <p className="text-sm text-gray-600">
-                        Status:{" "}
+                      <div className="mt-2">
                         <span
-                          className={`font-medium ${
+                          className={`inline-block px-3 sm:px-4 py-1.5 sm:py-2 rounded-full text-xs sm:text-sm font-bold ${
                             order.status === "served"
-                              ? "text-green-600"
+                              ? "bg-green-100 text-green-800"
                               : order.status === "ready"
-                              ? "text-blue-600"
+                              ? "bg-blue-100 text-blue-800 animate-pulse-custom"
                               : order.status === "preparing"
-                              ? "text-yellow-600"
-                              : "text-gray-600"
+                              ? "bg-yellow-100 text-yellow-800 animate-pulse-custom"
+                              : "bg-gray-100 text-gray-800"
                           }`}
                         >
-                          {order.status.toUpperCase()}
+                          {order.status === "served"
+                            ? "✅ Served"
+                            : order.status === "ready"
+                            ? "🍽️ Ready"
+                            : order.status === "preparing"
+                            ? "👨‍🍳 Preparing"
+                            : "📥 Received"}
                         </span>
-                      </p>
+                      </div>
                     </div>
-                    <div className="text-right text-sm text-gray-500">
-                      {new Date(order.createdAt).toLocaleString()}
+                    <div className="w-full sm:w-auto sm:text-right">
+                      <div className="text-xs sm:text-sm text-gray-500 bg-gray-100 px-2 sm:px-3 py-1 rounded-full inline-block">
+                        ⏰ {new Date(order.createdAt).toLocaleString()}
+                      </div>
                     </div>
                   </div>
-                  <ul className="mb-2">
-                    {order.items.map((item, idx) => (
-                      <li key={idx} className="text-sm">
-                        {item.qty}x {item.name} - ₹{item.price * item.qty}
-                      </li>
-                    ))}
-                  </ul>
-                  <div className="flex justify-between items-center pt-2 border-t">
-                    <span className="text-sm">
+
+                  <div className="bg-gradient-to-r from-orange-50 to-red-50 rounded-xl p-3 sm:p-4 mb-4">
+                    <h4 className="font-bold text-sm sm:text-base text-gray-700 mb-3 flex items-center gap-2">
+                      <span>📝</span> Order Items:
+                    </h4>
+                    <ul className="space-y-2">
+                      {order.items.map((item, idx) => (
+                        <li
+                          key={idx}
+                          className="flex flex-col sm:flex-row justify-between items-start sm:items-center text-gray-800 gap-2 sm:gap-0"
+                        >
+                          <span className="flex items-center gap-2">
+                            <span className="bg-gradient-to-r from-orange-600 to-red-600 text-white font-bold px-2 sm:px-3 py-1 rounded-full text-xs sm:text-sm">
+                              {item.qty}x
+                            </span>
+                            <span className="font-semibold text-sm sm:text-base">
+                              {item.name}
+                            </span>
+                          </span>
+                          <span className="font-bold text-gray-700 text-sm sm:text-base ml-8 sm:ml-0">
+                            ₹{item.price * item.qty}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-0 pt-3 sm:pt-4 border-t-2 border-gray-200">
+                    <span className="text-xs sm:text-sm font-semibold text-gray-600 flex items-center gap-2">
+                      <span>💳</span>
                       Payment: {order.payment.method}
                     </span>
-                    <span className="font-bold">
+                    <span className="text-lg sm:text-2xl font-bold gradient-sunset bg-clip-text text-transparent">
                       Total: ₹
                       {order.items.reduce((sum, i) => sum + i.price * i.qty, 0)}
                     </span>
@@ -258,7 +373,21 @@ export default function Customer() {
                 </div>
               ))}
               {myOrders.length === 0 && (
-                <p className="text-gray-500 text-center">No orders yet</p>
+                <div className="text-center py-12 sm:py-20">
+                  <div className="text-6xl sm:text-8xl mb-4">📋</div>
+                  <p className="text-xl sm:text-2xl font-bold text-gray-400">
+                    No Orders Yet
+                  </p>
+                  <p className="text-gray-500 mt-2">
+                    Start by browsing our menu!
+                  </p>
+                  <button
+                    onClick={() => setActiveTab("menu")}
+                    className="mt-6 gradient-sunset text-white px-8 py-4 rounded-xl font-bold hover-lift transition-all duration-300"
+                  >
+                    Browse Menu
+                  </button>
+                </div>
               )}
             </div>
           </div>

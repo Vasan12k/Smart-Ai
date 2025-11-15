@@ -1,6 +1,6 @@
-# IPO Frontend
+# AI Restaurant Frontend
 
-This is the React + Vite frontend for IPO. It uses Tailwind CSS.
+This is the React + Vite frontend for AI Restaurant. It uses Tailwind CSS.
 
 Quick start:
 

@@ -1,0 +1,94 @@
+mutation CreateDemoData @transaction @auth(level: PUBLIC, insecureReason: "This operation is used to seed the database with demo data and is safe to expose to the public.") {
+  user_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440000",
+      displayName: "demouser1",
+      email: "demouser1@example.com"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440001",
+      displayName: "demouser2",
+      email: "demouser2@example.com"
+    }
+  ])
+  menuItem_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440002",
+      name: "Pizza",
+      category: "Main Course",
+      price: 12.99,
+      isAvailable: true
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440003",
+      name: "Burger",
+      category: "Main Course",
+      price: 9.99,
+      isAvailable: true
+    }
+  ])
+  table_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440004",
+      tableNumber: 1,
+      capacity: 4,
+      isAvailable: true,
+      locationDescription: "Near the window"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440005",
+      tableNumber: 2,
+      capacity: 2,
+      isAvailable: true,
+      locationDescription: "In the corner"
+    }
+  ])
+  reservation_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440006",
+      userId: "550e8400-e29b-41d4-a716-446655440000",
+      numberOfGuests: 2,
+      reservationDate: "2024-03-15",
+      reservationTime: "19:00",
+      status: "Confirmed"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440007",
+      userId: "550e8400-e29b-41d4-a716-446655440001",
+      numberOfGuests: 4,
+      reservationDate: "2024-03-16",
+      reservationTime: "20:00",
+      status: "Pending"
+    }
+  ])
+  order_insertMany(data: [
+    {
+      id: "550e8400-e29b-41d4-a716-446655440008",
+      userId: "550e8400-e29b-41d4-a716-446655440000",
+      orderDate: "2024-03-14T12:00:00Z",
+      totalAmount: 25.98,
+      status: "Completed"
+    },
+    {
+      id: "550e8400-e29b-41d4-a716-446655440009",
+      userId: "550e8400-e29b-41d4-a716-446655440001",
+      orderDate: "2024-03-14T13:00:00Z",
+      totalAmount: 19.98,
+      status: "Pending"
+    }
+  ])
+  orderItem_insertMany(data: [
+    {
+      orderId: "550e8400-e29b-41d4-a716-446655440008",
+      menuItemId: "550e8400-e29b-41d4-a716-446655440002",
+      priceAtTimeOfOrder: 12.99,
+      quantity: 1
+    },
+    {
+      orderId: "550e8400-e29b-41d4-a716-446655440009",
+      menuItemId: "550e8400-e29b-41d4-a716-446655440003",
+      priceAtTimeOfOrder: 9.99,
+      quantity: 2
+    }
+  ])
+}

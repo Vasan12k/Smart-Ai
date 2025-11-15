@@ -1,9 +1,9 @@
 require("dotenv").config();
 const express = require("express");
 const http = require("http");
-const mongoose = require("mongoose");
 const cors = require("cors");
 const { initSocket } = require("./socket");
+const { initializeFirebase } = require("./config/firebase");
 
 const authRoutes = require("./routes/auth");
 const managerRoutes = require("./routes/manager");
@@ -28,59 +28,24 @@ const PORT = process.env.PORT || 4000;
 const server = http.createServer(app);
 const io = initSocket(server);
 
-const { MongoMemoryServer } = require("mongodb-memory-server");
-
 const start = async () => {
-  let mongod = null;
-
-  // Check if external MongoDB URI is configured
-  const MONGO_URI = process.env.MONGO_URI;
-
-  if (MONGO_URI) {
-    try {
-      // Try external connection if URI is provided
-      await mongoose.connect(MONGO_URI, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
-      console.log("✅ Connected to MongoDB:", MONGO_URI);
-    } catch (err) {
-      console.warn("⚠️  Could not connect to external MongoDB:", err.message);
-      console.log("📦 Starting in-memory MongoDB...");
-      mongod = await MongoMemoryServer.create();
-      const uri = mongod.getUri();
-      await mongoose.connect(uri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
-      console.log("✅ Connected to in-memory MongoDB");
-    }
-  } else {
-    // No external URI, use in-memory directly
-    console.log(
-      "📦 No external MongoDB configured, using in-memory database..."
-    );
-    try {
-      mongod = await MongoMemoryServer.create();
-      const uri = mongod.getUri();
-      await mongoose.connect(uri, {
-        useNewUrlParser: true,
-        useUnifiedTopology: true,
-      });
-      console.log("✅ Connected to in-memory MongoDB:", uri);
-    } catch (err2) {
-      console.error("❌ Error starting in-memory MongoDB:", err2);
-      process.exit(1);
-    }
+  try {
+    // Initialize Firebase Firestore
+    initializeFirebase();
+    console.log("✅ Firebase Firestore initialized successfully");
+  } catch (err) {
+    console.error("❌ Error initializing Firebase:", err);
+    process.exit(1);
   }
 
   server.listen(PORT, () => {
     console.log(`🚀 Server running on port ${PORT}`);
+    console.log(`📁 Database: Firebase Firestore`);
   });
 
-  // On process exit, stop in-memory server if used
+  // Graceful shutdown
   process.on("SIGINT", async () => {
-    if (mongod) await mongod.stop();
+    console.log("\n🛑 Shutting down server...");
     process.exit(0);
   });
 };

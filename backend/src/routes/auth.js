@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const User = require("../models/User");
+const { getDb } = require("../config/firebase");
 
 // POST /auth/register
 router.post("/register", async (req, res) => {
@@ -13,29 +13,67 @@ router.post("/register", async (req, res) => {
     if (!name || !email || !password || !role)
       return res.status(400).json({ message: "Missing fields" });
 
-    const existing = await User.findOne({ email });
-    if (existing)
-      return res.status(400).json({ message: "Email already registered" });
+    let db;
+    try {
+      db = getDb();
+    } catch (dbError) {
+      console.error("Firebase connection error:", dbError.message);
+      return res.status(500).json({
+        message:
+          "Database connection error. Please check Firebase configuration.",
+      });
+    }
+
+    const usersRef = db.collection("users");
+
+    // Check if email already exists
+    try {
+      const existingUser = await usersRef.where("email", "==", email).get();
+      if (!existingUser.empty)
+        return res.status(400).json({ message: "Email already registered" });
+    } catch (dbError) {
+      console.error("Database query error:", dbError.message);
+      return res.status(500).json({
+        message: "Database error. Please check Firebase credentials.",
+      });
+    }
 
     const salt = await bcrypt.genSalt(10);
     const hash = await bcrypt.hash(password, salt);
 
-    const user = new User({ name, email, passwordHash: hash, role });
-    await user.save();
-    console.log("User created successfully:", user._id);
+    // Create user document
+    const userData = {
+      name,
+      email,
+      passwordHash: hash,
+      role,
+      createdAt: new Date().toISOString(),
+    };
+
+    let userDoc;
+    try {
+      userDoc = await usersRef.add(userData);
+      console.log("User created successfully:", userDoc.id);
+    } catch (dbError) {
+      console.error("Database write error:", dbError.message);
+      return res.status(500).json({
+        message: "Could not create user. Please check Firebase credentials.",
+      });
+    }
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: userDoc.id, role: role },
       process.env.JWT_SECRET || "devsecret",
       { expiresIn: "7d" }
     );
+
     res.json({
       token,
       user: {
-        id: user._id,
-        name: user.name,
-        email: user.email,
-        role: user.role,
+        id: userDoc.id,
+        name,
+        email,
+        role,
       },
     });
   } catch (err) {
@@ -52,21 +90,50 @@ router.post("/login", async (req, res) => {
     if (!email || !password)
       return res.status(400).json({ message: "Missing fields" });
 
-    const user = await User.findOne({ email });
-    if (!user) return res.status(401).json({ message: "Invalid credentials" });
+    let db;
+    try {
+      db = getDb();
+    } catch (dbError) {
+      console.error("Firebase connection error:", dbError.message);
+      return res.status(500).json({
+        message:
+          "Database connection error. Please check Firebase configuration.",
+      });
+    }
+
+    const usersRef = db.collection("users");
+
+    // Find user by email
+    let userSnapshot;
+    try {
+      userSnapshot = await usersRef.where("email", "==", email).get();
+    } catch (dbError) {
+      console.error("Database query error:", dbError.message);
+      return res.status(500).json({
+        message: "Database error. Please check Firebase credentials.",
+      });
+    }
+
+    if (userSnapshot.empty)
+      return res.status(401).json({ message: "Invalid credentials" });
+
+    const userDoc = userSnapshot.docs[0];
+    const user = userDoc.data();
+    const userId = userDoc.id;
 
     const match = await bcrypt.compare(password, user.passwordHash);
     if (!match) return res.status(401).json({ message: "Invalid credentials" });
 
     const token = jwt.sign(
-      { id: user._id, role: user.role },
+      { id: userId, role: user.role },
       process.env.JWT_SECRET || "devsecret",
       { expiresIn: "7d" }
     );
+
     res.json({
       token,
       user: {
-        id: user._id,
+        id: userId,
         name: user.name,
         email: user.email,
         role: user.role,

@@ -1,0 +1,27 @@
+mutation CreateMenuItem($category: String!, $description: String, $imageUrl: String, $isAvailable: Boolean!, $name: String!, $price: Float!) @auth(level: USER) {
+  menuItem_insert(data: {category: $category, description: $description, imageUrl: $imageUrl, isAvailable: $isAvailable, name: $name, price: $price})
+}
+
+query ListAvailableMenuItems @auth(level: PUBLIC, insecureReason: "This operation is safe to expose to the public") {
+  menuItems(where: {isAvailable: {eq: true}}) {
+    id
+    name
+    description
+    price
+    imageUrl
+    category
+  }
+}
+
+mutation UpdateReservationStatus($id: UUID!, $status: String!) @auth(level: USER) {
+  reservation_update(key: {id: $id}, data: {status: $status})
+}
+
+query ListUserOrders($userId: UUID!) @auth(level: USER) {
+  orders(where: {userId: {eq: $userId}}) {
+    id
+    orderDate
+    totalAmount
+    status
+  }
+}

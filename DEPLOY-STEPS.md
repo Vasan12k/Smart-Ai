@@ -1,4 +1,4 @@
-# IPO Restaurant - Step-by-Step Cloud Deployment
+# AI Restaurant - Step-by-Step Cloud Deployment
 
 ## இப்போது செய்ய வேண்டியவை:
 
@@ -18,7 +18,7 @@
 
 3. **Setup Access**:
 
-   - Username: `ipo_admin`
+   - Username: `ai_admin`
    - Password: Create a strong password (save it!)
    - Click "Create Database User"
 
@@ -33,7 +33,7 @@
    - Choose "Connect your application"
    - Copy the connection string
    - Replace `<password>` with your password
-   - Example: `mongodb+srv://ipo_admin:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/ipo_restaurant?retryWrites=true&w=majority`
+   - Example: `mongodb+srv://ai_admin:YOUR_PASSWORD@cluster0.xxxxx.mongodb.net/ai_restaurant?retryWrites=true&w=majority`
 
 ---
 
@@ -47,7 +47,7 @@
 2. **Deploy Backend**:
 
    - Click "New Project" → "Deploy from GitHub repo"
-   - Select your IPO project (or upload folder)
+   - Select your AI Restaurant project (or upload folder)
    - Root Directory: `backend`
    - Build Command: (leave empty)
    - Start Command: `npm start`
@@ -58,14 +58,14 @@
    - Add these:
      ```
      MONGO_URI=<your-mongodb-connection-string-from-step1>
-     JWT_SECRET=ipo-restaurant-secret-key-2025
+     JWT_SECRET=ai-restaurant-secret-key-2025
      PORT=4000
      NODE_ENV=production
      ```
 
 4. **Generate Domain**:
    - Click "Settings" → "Generate Domain"
-   - Copy your backend URL (e.g., `https://ipo-backend-production.up.railway.app`)
+   - Copy your backend URL (e.g., `https://ai-restaurant-backend.up.railway.app`)
 
 ---
 
@@ -79,7 +79,7 @@
 2. **Import Project**:
 
    - Click "Add New" → "Project"
-   - Import your IPO repository
+   - Import your AI Restaurant repository
    - Framework Preset: Vite
    - Root Directory: `frontend`
    - Build Command: `npm run build`
@@ -92,12 +92,12 @@
      ```
      VITE_API_URL=<your-railway-backend-url>
      ```
-     Example: `https://ipo-backend-production.up.railway.app`
+     Example: `https://ai-restaurant-backend.up.railway.app`
 
 4. **Deploy**:
    - Click "Deploy"
    - Wait 2-3 minutes
-   - Copy your frontend URL (e.g., `https://ipo-restaurant.vercel.app`)
+   - Copy your frontend URL (e.g., `https://ai-restaurant.vercel.app`)
 
 ---
 
@@ -156,7 +156,7 @@ export default defineConfig({
 3. Connect GitHub
 4. Settings:
 
-   - Name: `ipo-backend`
+   - Name: `ai-restaurant-backend`
    - Root Directory: `backend`
    - Build: `npm install`
    - Start: `npm start`
@@ -168,7 +168,7 @@ export default defineConfig({
 
 1. "New +" → "Static Site"
 2. Settings:
-   - Name: `ipo-frontend`
+   - Name: `ai-restaurant-frontend`
    - Root Directory: `frontend`
    - Build: `npm install && npm run build`
    - Publish: `dist`

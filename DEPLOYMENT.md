@@ -1,4 +1,4 @@
-# IPO Restaurant - Cloud Deployment Guide
+# AI Restaurant - Cloud Deployment Guide
 
 ## Quick Deploy (Free)
 
