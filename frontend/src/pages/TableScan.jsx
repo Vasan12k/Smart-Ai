@@ -2,14 +2,19 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import io from "socket.io-client";
+import { useTranslation } from "react-i18next";
 
 export default function TableScan() {
   const { tableNumber } = useParams();
+  const { t, i18n } = useTranslation();
   const [menu, setMenu] = useState([]);
   const [cart, setCart] = useState([]);
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
   const [notification, setNotification] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
+  const [showAI, setShowAI] = useState(false);
+  const [isListening, setIsListening] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -54,11 +59,71 @@ export default function TableScan() {
       // Public endpoint to get menu items
       const res = await axios.get("/manager/menu/public");
       setMenu(res.data);
+      // Fetch AI recommendations
+      fetchRecommendations();
     } catch (err) {
       console.error(err);
     } finally {
       setLoading(false);
     }
+  };
+
+  const fetchRecommendations = async () => {
+    try {
+      const res = await axios.post("/ai/recommendations", {
+        preferences: [],
+        orderHistory: [],
+      });
+      setRecommendations(res.data.recommendations || []);
+    } catch (err) {
+      console.error("Failed to fetch recommendations:", err);
+    }
+  };
+
+  const startVoiceOrder = () => {
+    setIsListening(true);
+    // Check if browser supports speech recognition
+    if ("webkitSpeechRecognition" in window || "SpeechRecognition" in window) {
+      const SpeechRecognition =
+        window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
+      recognition.lang = "en-US";
+      recognition.continuous = false;
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        showNotification("🎤 Voice recognized", `You said: "${transcript}"`);
+        // Parse voice command to add items
+        parseVoiceCommand(transcript);
+        setIsListening(false);
+      };
+
+      recognition.onerror = () => {
+        showNotification(
+          "❌ Error",
+          "Could not recognize voice. Please try again."
+        );
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } else {
+      showNotification(
+        "❌ Not supported",
+        "Voice ordering not supported in this browser"
+      );
+      setIsListening(false);
+    }
+  };
+
+  const parseVoiceCommand = (text) => {
+    const lowerText = text.toLowerCase();
+    menu.forEach((item) => {
+      if (lowerText.includes(item.name.toLowerCase())) {
+        addToCart(item);
+        showNotification("✅ Added", `${item.name} added to cart`);
+      }
+    });
   };
 
   const addToCart = (item) => {
@@ -128,9 +193,106 @@ export default function TableScan() {
 
       {/* Header */}
       <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-4 sticky top-0 z-10 shadow-lg">
-        <h1 className="text-2xl font-bold">IPO Restaurant</h1>
-        <p className="text-sm opacity-90">Table {tableNumber}</p>
+        <div className="flex justify-between items-center">
+          <div>
+            <h1 className="text-2xl font-bold">{t("appName")}</h1>
+            <p className="text-sm opacity-90">
+              {t("table")} {tableNumber}
+            </p>
+          </div>
+          <div className="flex gap-2">
+            {/* Language Switcher */}
+            <select
+              value={i18n.language}
+              onChange={(e) => i18n.changeLanguage(e.target.value)}
+              className="bg-white text-purple-600 px-3 py-1 rounded text-sm font-semibold"
+            >
+              <option value="en">🇬🇧 EN</option>
+              <option value="ta">🇮🇳 தமிழ்</option>
+              <option value="hi">🇮🇳 हिन्दी</option>
+            </select>
+            <button
+              onClick={() => setShowAI(!showAI)}
+              className="bg-white text-purple-600 px-4 py-2 rounded-lg font-semibold text-sm hover:bg-purple-50 transition"
+            >
+              🤖 {t("aiAssistant")}
+            </button>
+          </div>
+        </div>
       </div>
+
+      {/* AI Assistant Panel */}
+      {showAI && !order && (
+        <div className="max-w-4xl mx-auto p-4 bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg shadow-lg mb-4 mt-4">
+          <h3 className="text-lg font-bold mb-3 text-purple-800">
+            🤖 {t("aiAssistant")}
+          </h3>
+
+          {/* Voice Ordering */}
+          <div className="mb-4">
+            <button
+              onClick={startVoiceOrder}
+              disabled={isListening}
+              className={`w-full py-3 rounded-lg font-semibold text-white transition ${
+                isListening
+                  ? "bg-red-500 animate-pulse"
+                  : "bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700"
+              }`}
+            >
+              {isListening
+                ? `🎤 ${t("voiceListening")}`
+                : `🎤 ${t("voiceOrder")}`}
+            </button>
+            <p className="text-xs text-gray-600 mt-1 text-center">
+              {t("voiceInstruction")}
+            </p>
+          </div>
+
+          {/* AI Recommendations */}
+          {recommendations.length > 0 && (
+            <div>
+              <h4 className="font-semibold mb-2 text-purple-800">
+                ✨ Recommended for you:
+              </h4>
+              <div className="space-y-2">
+                {recommendations.map((rec, idx) => (
+                  <div
+                    key={idx}
+                    className="bg-white p-3 rounded-lg shadow flex justify-between items-center"
+                  >
+                    <div className="flex-1">
+                      <p className="font-semibold text-sm">{rec.name}</p>
+                      <p className="text-xs text-gray-600">{rec.reason}</p>
+                      <div className="flex items-center mt-1">
+                        <div className="bg-green-100 text-green-800 text-xs px-2 py-0.5 rounded">
+                          {Math.round(rec.confidence * 100)}% {t("match")}
+                        </div>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => {
+                        const item = menu.find((m) =>
+                          m.name.toLowerCase().includes(rec.name.toLowerCase())
+                        );
+                        if (item) {
+                          addToCart(item);
+                          showNotification(
+                            "✅ Added",
+                            `${item.name} added to cart`
+                          );
+                        }
+                      }}
+                      className="ml-3 bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-semibold hover:bg-purple-700"
+                    >
+                      Add
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {order ? (
         /* Order Status View */

@@ -12,6 +12,7 @@ export default defineConfig({
       "/orders": "http://localhost:4000",
       "/payments": "http://localhost:4000",
       "/recommendations": "http://localhost:4000",
+      "/ai": "http://localhost:4000",
     },
   },
 });

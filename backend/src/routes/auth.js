@@ -8,6 +8,8 @@ const User = require("../models/User");
 router.post("/register", async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
+    console.log("Register attempt:", { name, email, role });
+
     if (!name || !email || !password || !role)
       return res.status(400).json({ message: "Missing fields" });
 
@@ -20,6 +22,7 @@ router.post("/register", async (req, res) => {
 
     const user = new User({ name, email, passwordHash: hash, role });
     await user.save();
+    console.log("User created successfully:", user._id);
 
     const token = jwt.sign(
       { id: user._id, role: user.role },
@@ -36,8 +39,9 @@ router.post("/register", async (req, res) => {
       },
     });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error("Registration error:", err.message);
+    console.error("Full error:", err);
+    res.status(500).json({ message: "Server error: " + err.message });
   }
 });
 
