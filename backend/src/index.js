@@ -61,10 +61,13 @@ const start = async () => {
 
 // For Vercel serverless deployment
 if (process.env.VERCEL) {
-  initializeFirebase();
+  try {
+    initializeFirebase();
+    console.log("✅ Firebase initialized for Vercel");
+  } catch (err) {
+    console.error("❌ Firebase initialization failed:", err);
+  }
   module.exports = app;
 } else {
   start();
 }
-
-module.exports = { app, server, io };
