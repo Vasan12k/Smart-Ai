@@ -79,3 +79,4 @@ Frontend starts on http://localhost:3000
 - **Real-time**: Socket.IO with role-based namespaces
 
 See backend/README.md and frontend/README.md for more details.
+BY VASAN
