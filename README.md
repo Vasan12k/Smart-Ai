@@ -1,5 +1,5 @@
 # AI Restaurant - Smart Restaurant Management System 
-smart dine ai
+smart dine ai a qr based smart system mangement
 
 Full-stack AI-powered restaurant management system with real-time ordering, role-based access, and responsive UI.
 
