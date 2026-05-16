@@ -17,7 +17,7 @@ Full-stack AI-powered restaurant management system with real-time ordering, role
 - ✅ Real-time order events (new_order, order_status_changed, order_update)
 - ✅ In-memory MongoDB fallback (no Docker required for dev)
 
-### Frontend
+### Frontend.
 
 - ✅ React + Vite + Tailwind CSS
 - ✅ React Router with protected routes
